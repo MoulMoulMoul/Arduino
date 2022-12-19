@@ -8,24 +8,26 @@
 const char* ssid = "WifiMoul1_24";
 const char* password = "1234512345";
 
-#define DHTPIN 27     // Digital pin connected to the DHT sensor
+#define DHTPIN1 27     // Digital pin connected to the DHT sensor 27
+#define DHTPIN2 25     // Digital pin connected to the DHT sensor 25
 
 // Uncomment the type of sensor in use:
 //#define DHTTYPE    DHT11     // DHT 11
 #define DHTTYPE    DHT22     // DHT 22 (AM2302)
 //#define DHTTYPE    DHT21     // DHT 21 (AM2301)
 
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht1(DHTPIN1, DHTTYPE);
+DHT dht2(DHTPIN2, DHTTYPE);
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
-String readDHTTemperature() {
+String readDHT1Temperature() {
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
+  float t = dht1.readTemperature();
   // Read temperature as Fahrenheit (isFahrenheit = true)
-  //float t = dht.readTemperature(true);
+  //float t = dht1.readTemperature(true);
   // Check if any reads failed and exit early (to try again).
   if (isnan(t)) {    
     Serial.println("Failed to read from DHT sensor!");
@@ -37,9 +39,39 @@ String readDHTTemperature() {
   }
 }
 
-String readDHTHumidity() {
+String readDHT1Humidity() {
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float h = dht.readHumidity();
+  float h = dht1.readHumidity();
+  if (isnan(h)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return "--";
+  }
+  else {
+    Serial.println(h);
+    return String(h);
+  }
+}
+
+String readDHT2Temperature() {
+  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+  // Read temperature as Celsius (the default)
+  float t = dht2.readTemperature();
+  // Read temperature as Fahrenheit (isFahrenheit = true)
+  //float t = dht2.readTemperature(true);
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(t)) {    
+    Serial.println("Failed to read from DHT sensor!");
+    return "--";
+  }
+  else {
+    Serial.println(t);
+    return String(t);
+  }
+}
+
+String readDHT2Humidity() {
+  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+  float h = dht2.readHumidity();
   if (isnan(h)) {
     Serial.println("Failed to read from DHT sensor!");
     return "--";
@@ -112,14 +144,26 @@ setInterval(function ( ) {
 </script>
 </html>)rawliteral";
 
-// Replaces placeholder with DHT values
-String processor(const String& var){
+// Replaces placeholder with DHT1 values
+String processor1(const String& var){
   //Serial.println(var);
   if(var == "TEMPERATURE"){
-    return readDHTTemperature();
+    return readDHT1Temperature();
   }
   else if(var == "HUMIDITY"){
-    return readDHTHumidity();
+    return readDHT1Humidity();
+  }
+  return String();
+}
+
+// Replaces placeholder with DHT2 values
+String processor2(const String& var){
+  //Serial.println(var);
+  if(var == "TEMPERATURE"){
+    return readDHT2Temperature();
+  }
+  else if(var == "HUMIDITY"){
+    return readDHT2Humidity();
   }
   return String();
 }
@@ -142,13 +186,22 @@ void setup(){
 
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
+    request->send_P(200, "text/html", index_html, processor1);
+  });
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html, processor2);
   });
   server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/plain", readDHTTemperature().c_str());
+    request->send_P(200, "text/plain", readDHT1Temperature().c_str());
   });
   server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/plain", readDHTHumidity().c_str());
+    request->send_P(200, "text/plain", readDHT1Humidity().c_str());
+  });
+  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/plain", readDHT2Temperature().c_str());
+  });
+  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/plain", readDHT2Humidity().c_str());
   });
 
   // Start server
