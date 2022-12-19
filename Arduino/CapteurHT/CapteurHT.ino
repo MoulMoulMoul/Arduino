@@ -141,7 +141,7 @@ setInterval(function ( ) {
   };
   xhttp.open("GET", "/temperature1", true);
   xhttp.send();
-}, 10000 ) ;
+}, 5000 ) ;
 
 setInterval(function ( ) {
   var xhttp = new XMLHttpRequest();
@@ -152,7 +152,7 @@ setInterval(function ( ) {
   };
   xhttp.open("GET", "/humidity1", true);
   xhttp.send();
-}, 10000 ) ;
+}, 5000 ) ;
 setInterval(function ( ) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -178,7 +178,7 @@ setInterval(function ( ) {
 </html>)rawliteral";
 
 // Replaces placeholder with DHT1 values
-String processor1(const String& var){
+String processor(const String& var){
   //Serial.println(var);
   if(var == "TEMPERATURE1"){
     return readDHT1Temperature();
@@ -186,13 +186,7 @@ String processor1(const String& var){
   else if(var == "HUMIDITY1"){
     return readDHT1Humidity();
   }
-  return String();
-}
-
-// Replaces placeholder with DHT2 values
-String processor2(const String& var){
-  //Serial.println(var);
-  if(var == "TEMPERATURE2"){
+    if(var == "TEMPERATURE2"){
     return readDHT2Temperature();
   }
   else if(var == "HUMIDITY2"){
@@ -205,7 +199,8 @@ void setup(){
   // Serial port for debugging purposes
   Serial.begin(115200);
 
-  dht.begin();
+  dht1.begin();
+  dht2.begin();
   
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
@@ -219,10 +214,7 @@ void setup(){
 
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor1);
-  });
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor2);
+    request->send_P(200, "text/html", index_html, processor);
   });
   server.on("/temperature1", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", readDHT1Temperature().c_str());
