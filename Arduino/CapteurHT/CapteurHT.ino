@@ -108,14 +108,26 @@ const char index_html[] PROGMEM = R"rawliteral(
   <h2>ESP32 DHT Server</h2>
   <p>
     <i class="fas fa-thermometer-half" style="color:#059e8a;"></i> 
-    <span class="dht-labels">Temperature</span> 
-    <span id="temperature">%TEMPERATURE%</span>
+    <span class="dht-labels">Temperature1</span> 
+    <span id="temperature1">%TEMPERATURE1%</span>
     <sup class="units">&deg;C</sup>
   </p>
   <p>
     <i class="fas fa-tint" style="color:#00add6;"></i> 
-    <span class="dht-labels">Humidity</span>
-    <span id="humidity">%HUMIDITY%</span>
+    <span class="dht-labels">Humidity1</span>
+    <span id="humidity1">%HUMIDITY1%</span>
+    <sup class="units">&percnt;</sup>
+  </p>
+  <p>
+    <i class="fas fa-thermometer-half" style="color:#059e8a;"></i> 
+    <span class="dht-labels">Temperature2</span> 
+    <span id="temperature2">%TEMPERATURE2%</span>
+    <sup class="units">&deg;C</sup>
+  </p>
+  <p>
+    <i class="fas fa-tint" style="color:#00add6;"></i> 
+    <span class="dht-labels">Humidity2</span>
+    <span id="humidity2">%HUMIDITY2%</span>
     <sup class="units">&percnt;</sup>
   </p>
 </body>
@@ -124,10 +136,10 @@ setInterval(function ( ) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      document.getElementById("temperature").innerHTML = this.responseText;
+      document.getElementById("temperature1").innerHTML = this.responseText;
     }
   };
-  xhttp.open("GET", "/temperature", true);
+  xhttp.open("GET", "/temperature1", true);
   xhttp.send();
 }, 10000 ) ;
 
@@ -135,10 +147,31 @@ setInterval(function ( ) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      document.getElementById("humidity").innerHTML = this.responseText;
+      document.getElementById("humidity1").innerHTML = this.responseText;
     }
   };
-  xhttp.open("GET", "/humidity", true);
+  xhttp.open("GET", "/humidity1", true);
+  xhttp.send();
+}, 10000 ) ;
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("temperature2").innerHTML = this.responseText;
+    }
+  };
+  xhttp.open("GET", "/temperature2", true);
+  xhttp.send();
+}, 10000 ) ;
+
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("humidity2").innerHTML = this.responseText;
+    }
+  };
+  xhttp.open("GET", "/humidity2", true);
   xhttp.send();
 }, 10000 ) ;
 </script>
@@ -147,10 +180,10 @@ setInterval(function ( ) {
 // Replaces placeholder with DHT1 values
 String processor1(const String& var){
   //Serial.println(var);
-  if(var == "TEMPERATURE"){
+  if(var == "TEMPERATURE1"){
     return readDHT1Temperature();
   }
-  else if(var == "HUMIDITY"){
+  else if(var == "HUMIDITY1"){
     return readDHT1Humidity();
   }
   return String();
@@ -159,10 +192,10 @@ String processor1(const String& var){
 // Replaces placeholder with DHT2 values
 String processor2(const String& var){
   //Serial.println(var);
-  if(var == "TEMPERATURE"){
+  if(var == "TEMPERATURE2"){
     return readDHT2Temperature();
   }
-  else if(var == "HUMIDITY"){
+  else if(var == "HUMIDITY2"){
     return readDHT2Humidity();
   }
   return String();
@@ -191,16 +224,16 @@ void setup(){
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/html", index_html, processor2);
   });
-  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/temperature1", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", readDHT1Temperature().c_str());
   });
-  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/humidity1", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", readDHT1Humidity().c_str());
   });
-  server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/temperature2", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", readDHT2Temperature().c_str());
   });
-  server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/humidity2", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", readDHT2Humidity().c_str());
   });
 
